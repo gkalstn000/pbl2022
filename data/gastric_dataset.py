@@ -38,14 +38,16 @@ class GastricDataset(BaseDataset) :
     def preprocess(self, dataframe):
         # Column 이름 변경
         dataframe.columns = new_columns
+
         # 필요없는 column 삭제, 설명회 기반
         drop_columns = ['before_cTNM', 'TNM', 'CEA', 'CA19']
         dataframe = dataframe[[column for column in dataframe.columns if column not in drop_columns]]
+
         # Column split / 환자데이터(환자기본정보+환자수술이력), 수술데이터(수술 전 데이터, 수술 데이터, 수술 후 데이터, 수술 후 분석 데이터), sequential, label, other(ESD_EMR, gasout, sd_start)
-        patient_columns = dataframe.columns[:25]
+        patient_columns = dataframe.columns[:25].drop('Prediction_day')
         surgery_columns = dataframe.columns[25:36].append(dataframe.columns[37:50]).append(dataframe.columns[52:82])
         sequential_columns = dataframe.columns[82:-2]
-        label_columns = dataframe.columns[-2:]
+        label_columns = ['DSL', ' onset', 'Prediction_day']
         other_columns = ['ESD_EMR', 'gasout', 'sd_start']
 
         df_patient = dataframe[patient_columns]
@@ -56,7 +58,13 @@ class GastricDataset(BaseDataset) :
 
         assert len(dataframe.columns) == len(df_patient.columns) + len(df_surgery.columns) + len(df_sequential.columns) + len(df_label.columns) + len(df_other.columns)
 
+        # patient columns 에서 필요없는 column drop
+        drop_columns = ['Patient_number', 'hospitalization_data', 'surgery_date', 'discharge_date']
+        df_patient = df_patient.drop(drop_columns, axis = 1)
+
         # category setting + make dummy variable
+
+
         return None, None, None
 
     def __getitem__(self, index):
