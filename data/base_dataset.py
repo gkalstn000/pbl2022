@@ -18,6 +18,12 @@ class BaseDataset(data.Dataset):
     def initialize(self, opt):
         pass
     def preprocess(self, dataframe):
+        '''
+        필요없는 column drop
+        data type 변경
+        :param dataframe:
+        :return:
+        '''
         # Column 이름 변경
         dataframe = dataframe.replace('*', np.nan)
         dataframe.columns = new_columns
