@@ -104,6 +104,8 @@ class BaseDataset(data.Dataset):
 
         return df_patient, df_surgery, df_sequential, df_label, df_other
 
+    def normalize_df(self, df):
+        return (df-df.mean())/df.std()
 new_columns = ['Patient_number', 'Prediction_day', 'sex', 'age', 'hospitalization_data', 'surgery_date', 'discharge_date', 'height', 'weight', 'BMI', 'smoking', 'cancer_heredity', # 환자 기본 정보
                'ASA_score', 'HTN', 'DM', 'Dyslipidemia', 'cardiovascular_disease', 'cerebrovascular_disease', 'kidney_disease', 'respiratory_disease', 'primary_cancer', 'other_disease', 'abdominal_surgery_history', 'abdominal_surgery_history stomach', 'other_surgery_history', # 환자 수술 이력
                'before_echocardiography', 'before_pulmonary', 'before_cTNM', 'before_chest_CT', 'post_ESD', 'before_AGC', 'before_EGC', 'before_tubular', 'before_circular', 'before_clipping', 'before_EUS', 'before_PET_CT', # 수술 전 데이터

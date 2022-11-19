@@ -17,23 +17,23 @@ except ImportError:
 class Visualizer():
     def __init__(self, opt):
         self.opt = opt
-        self.tf_log = opt.isTrain and opt.tf_log
+        self.tf_log = opt.isTrain and opt.tensorboard_log
         self.use_html = opt.isTrain and not opt.no_html
         self.win_size = opt.display_winsize
-        self.id = opt.id
+        self.name = opt.name
         if self.tf_log:
             import tensorflow as tf
             self.tf = tf
-            self.log_dir = os.path.join(opt.checkpoints_dir, opt.id, 'logs')
+            self.log_dir = os.path.join(opt.checkpoints_dir, opt.name, 'logs')
             self.writer = tf.summary.FileWriter(self.log_dir)
 
         if self.use_html:
-            self.web_dir = os.path.join(opt.checkpoints_dir, opt.id, 'web')
+            self.web_dir = os.path.join(opt.checkpoints_dir, opt.name, 'web')
             self.img_dir = os.path.join(self.web_dir, 'images')
             print('create web directory %s...' % self.web_dir)
             util.mkdirs([self.web_dir, self.img_dir])
         if opt.isTrain:
-            self.log_name = os.path.join(opt.checkpoints_dir, opt.id, 'loss_log.txt')
+            self.log_name = os.path.join(opt.checkpoints_dir, opt.name, 'loss_log.txt')
             with open(self.log_name, "a") as log_file:
                 now = time.strftime("%c")
                 log_file.write('================ Training Loss (%s) ================\n' % now)
@@ -77,7 +77,7 @@ class Visualizer():
                     util.save_image(image_numpy, img_path)
 
             # update website
-            webpage = html.HTML(self.web_dir, 'Experiment id = %s' % self.id, refresh=5)
+            webpage = html.HTML(self.web_dir, 'Experiment id = %s' % self.name, refresh=5)
             for n in range(epoch, 0, -1):
                 webpage.add_header('epoch [%d]' % n)
                 ims = []

@@ -24,10 +24,12 @@ class BaseOptions():
         parser.add_argument('--gpu_ids', type=str, default='0', help='gpu ids: e.g. 0  0,1,2, 0,2. use -1 for CPU')
         parser.add_argument('--checkpoints_dir', type=str, default='./checkpoints', help='models are saved here')
         parser.add_argument('--model', type=str, default='rnn', help='which model to use')
+        parser.add_argument('--estimator', type=str, default='autoencoder', help='which model to use')
         parser.add_argument('--phase', type=str, default='train', help='train, val, test, etc')
 
         # input/output sizes
         parser.add_argument('--batchSize', type=int, default=1, help='input batch size')
+        parser.add_argument('--featur_size', type=int, default=545, help='input batch size')
 
         # for setting inputs
         parser.add_argument('--dataroot', type=str, default='./datasets')
@@ -55,9 +57,9 @@ class BaseOptions():
         opt, unknown = parser.parse_known_args()
 
         # modify model-related parser options
-        # model_name = opt.model
-        # model_option_setter = models.get_option_setter(model_name)
-        # parser = model_option_setter(parser, self.isTrain)
+        model_name = opt.model
+        model_option_setter = models.get_option_setter(model_name)
+        parser = model_option_setter(parser, self.isTrain)
 
         # modify dataset-related parser options
         dataset_mode = opt.dataset_mode

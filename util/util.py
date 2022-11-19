@@ -12,7 +12,6 @@ from PIL import Image
 import os
 import argparse
 import dill as pickle
-import util.coco
 
 
 def save_obj(obj, name):
