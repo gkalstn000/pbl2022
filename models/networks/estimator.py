@@ -5,7 +5,20 @@ from models.networks.base_network import BaseNetwork
 from models.networks.fc_layer import FC_layer
 import util.util as util
 
-class Autoencoder(BaseNetwork) :
+class diffusionEstimator(BaseNetwork) :
+    @staticmethod
+    def modify_commandline_options(parser, is_train):
+        parser.add_argument('--Autoencoder_layers', type=str, default='512, 256, 128, 50', help='# of En/Decoder layer')
+        opt, _ = parser.parse_known_args()
+
+        return parser
+    def __init__(self, opt):
+        self.opt = opt
+
+    def forward(self, x):
+        return 0
+
+class AutoencoderEstimator(BaseNetwork) :
     @staticmethod
     def modify_commandline_options(parser, is_train):
         parser.add_argument('--Autoencoder_layers', type=str, default='512, 256, 128, 50', help='# of En/Decoder layer')

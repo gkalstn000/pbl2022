@@ -2,6 +2,7 @@ import torch.nn as nn
 
 class FC_layer(nn.Module) :
     def __init__(self, size_in, size_out, keep_prob = 0.8):
+        super(FC_layer, self).__init__()
         linear = nn.Linear(size_in, size_out)
 
         self.layer = nn.Sequential(

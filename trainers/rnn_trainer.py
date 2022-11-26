@@ -14,6 +14,8 @@ class RNNTrainer():
     """
 
     def __init__(self, opt):
+        super(RNNTrainer, self).__init__()
+
         self.opt = opt
         self.rnn_model = RNNModel(opt)
 
@@ -25,11 +27,11 @@ class RNNTrainer():
 
     def run_estimator(self, data):
         self.optimizer_estimator.zero_grad()
-        e_losses, estimated = self.rnn_model(data, mode='estimate')
-        e_losses = sum(e_losses.values()).mean()
-        e_losses.backward()
+        E_losses, estimated = self.rnn_model(data, mode='estimate')
+        E_loss = sum(E_losses.values()).mean()
+        E_loss.backward()
         self.optimizer_estimator.step()
-        self.e_losses = e_losses
+        self.E_losses = E_losses
         self.estimated = estimated
 
 
@@ -53,7 +55,7 @@ class RNNTrainer():
     #     self.d_losses = d_losses
 
     def get_latest_losses(self):
-        return {**self.estimator_losses}
+        return {**self.E_losses}
 
     def get_latest_generated(self):
         return self.generated

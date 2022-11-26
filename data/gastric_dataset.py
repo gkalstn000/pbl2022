@@ -35,7 +35,7 @@ class GastricDataset(BaseDataset) :
     def __getitem__(self, index):
         static = self.static_dataset[index]
         sequence = self.sequencial_dataset[index]
-        label = self.self.label_dataset[index]
+        label = self.label_dataset[index]
 
         input_dict = {'static_input' : torch.Tensor(static),
                       'sequence_input' : torch.Tensor(sequence),

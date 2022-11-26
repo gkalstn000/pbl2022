@@ -24,12 +24,12 @@ class BaseOptions():
         parser.add_argument('--gpu_ids', type=str, default='0', help='gpu ids: e.g. 0  0,1,2, 0,2. use -1 for CPU')
         parser.add_argument('--checkpoints_dir', type=str, default='./checkpoints', help='models are saved here')
         parser.add_argument('--model', type=str, default='rnn', help='which model to use')
-        parser.add_argument('--estimator', type=str, default='autoencoder', help='which model to use')
+        parser.add_argument('--estimator', type=str, default='autoencoder', help='which model to use [autoencoder|diffusion]')
         parser.add_argument('--phase', type=str, default='train', help='train, val, test, etc')
 
         # input/output sizes
         parser.add_argument('--batchSize', type=int, default=1, help='input batch size')
-        parser.add_argument('--featur_size', type=int, default=545, help='input batch size')
+        parser.add_argument('--featur_size', type=int, default=109, help='input batch size')
 
         # for setting inputs
         parser.add_argument('--dataroot', type=str, default='./datasets')
@@ -38,6 +38,10 @@ class BaseOptions():
         parser.add_argument('--nThreads', default=0, type=int, help='# threads for loading data')
         parser.add_argument('--max_dataset_size', type=int, default=sys.maxsize, help='Maximum number of samples allowed per dataset. If the dataset directory contains more than max_dataset_size, only a subset is loaded.')
         parser.add_argument('--load_from_opt_file', action='store_true', help='load the options from checkpoints and use that as default')
+
+        # model setting
+        parser.add_argument('--init_type', type=str, default='xavier', help='network initialization [normal|xavier|kaiming|orthogonal]')
+        parser.add_argument('--init_variance', type=float, default=0.02, help='variance of the initialization distribution')
 
         # for displays
         parser.add_argument('--display_winsize', type=int, default=400, help='display window size')

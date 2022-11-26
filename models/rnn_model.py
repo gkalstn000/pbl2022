@@ -6,6 +6,7 @@ import torch.nn as nn
 import torch
 import models.networks as networks
 import util.util as util
+import torch.nn.functional as F
 
 class RNNModel(torch.nn.Module) :
     @staticmethod
@@ -14,22 +15,25 @@ class RNNModel(torch.nn.Module) :
         return parser
 
     def __init__(self, opt):
+        super(RNNModel, self).__init__()
         self.opt = opt
 
-        self.estimtator = self.initialize_networks(opt)
+        self.estimtator = self.initialize_networks(opt) # 오타수정
+        self.feature_seoector = None
+        self.sequential_model = None
 
         if opt.isTrain:
-            self.criterionBCE = nn.BCELoss()
+            self.criterionMSE = nn.MSELoss()
 
     def forward(self, data, mode):
         static, sequence, label = self.preprocess_input(data)
 
         if mode == 'estimate' :
-            e_loss, estimated = self.compute_estimator_loss(static)
-            return e_loss, estimated
+            E_losses, estimated = self.compute_estimator_loss(static)
+            return E_losses, estimated
 
     def create_optimizers(self, opt):
-        Estimator_params = list(self.Estimator_params.parameters())
+        Estimator_params = list(self.estimtator.parameters())
 
         beta1, beta2 = opt.beta1, opt.beta2
         estimator_lr = opt.lr
@@ -50,16 +54,27 @@ class RNNModel(torch.nn.Module) :
         return net_estimator
 
     def preprocess_input(self, data):
-        pass
+        data['static_input'] = data['static_input'].float().cuda()
+        data['sequence_input'] = data['sequence_input'].float().cuda()
+        data['label'] = data['label'].float().cuda()
+
+        return data['static_input'], data['sequence_input'], data['label']
 
     def compute_estimator_loss(self, static_data):
-        e_losses = {}
+        E_losses = {}
+        self.estimtator.train()
 
-        return e_losses
+        nan_index = static_data.isnan().cuda()
+        gaussian_tensor = torch.normal(0, 1, size = static_data.size()).cuda()
+
+        static_data = torch.nan_to_num(static_data, 0) + torch.mul(nan_index, gaussian_tensor) # fill nan to gaussian variable
+        estimated = self.estimate_feature(static_data)
+
+        E_losses['Feature_BCE'] = self.criterionMSE(estimated[~nan_index], static_data[~nan_index])
+
+        return E_losses, estimated
     def estimate_feature(self, static_data):
-
-        estimated = self.netG(static_data)
-
+        estimated = self.estimtator(static_data)
         return estimated
     def use_gpu(self):
         return len(self.opt.gpu_ids) > 0
