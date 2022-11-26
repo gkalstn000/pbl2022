@@ -31,6 +31,7 @@ for epoch in iter_counter.training_epochs():
         # train generator
         trainer.run_estimator(data_i)
         trainer.run_feature_selector(data_i)
+        trainer.run_sequential(data_i)
 
 
 

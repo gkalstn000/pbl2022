@@ -20,7 +20,7 @@ class GastricDataset(BaseDataset) :
 
         self.static_dataset = self.normalize_df(df_static).to_numpy()
         self.sequencial_dataset = self.normalize_df(df_sequential).to_numpy()
-        self.label_dataset = self.normalize_df(df_label).to_numpy()
+        self.label_dataset = df_label.to_numpy()
 
         stack = []
         for i in range(5) :

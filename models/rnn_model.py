@@ -19,8 +19,7 @@ class RNNModel(torch.nn.Module) :
         super(RNNModel, self).__init__()
         self.opt = opt
 
-        self.estimator, self.feature_selector = self.initialize_networks(opt) # 오타수정
-        self.sequential_model = None
+        self.estimator, self.feature_selector, self.sequential_model = self.initialize_networks(opt) # 오타수정
 
         if opt.isTrain:
             self.criterionMSE = nn.MSELoss()
@@ -34,30 +33,36 @@ class RNNModel(torch.nn.Module) :
             return E_losses, estimated
         elif mode == 'feature_select' :
             self.pca_dict = self.feature_selector(self.estimated)
-            self.selected_features = self.pca_dict['components']
-        elif mode == 'sequence' :
-            return None
+            self.selected_features = self.pca_dict['U'].to(torch.float32)
+            return self.pca_dict
+        elif mode == 'sequential' :
+            self.compute_sequential_loss(data['sequence_input'], self.selected_features, data['label'])
+
     def create_optimizers(self, opt):
         Estimator_params = list(self.estimator.parameters())
-
+        Sequential_params = list(self.sequential_model.parameters())
         beta1, beta2 = opt.beta1, opt.beta2
         estimator_lr = opt.lr
 
         optimizer_estimator = torch.optim.Adam(Estimator_params, lr=estimator_lr, betas=(beta1, beta2))
+        optimizer_sequential = torch.optim.Adam(Sequential_params, lr=estimator_lr, betas=(beta1, beta2))
 
-        return optimizer_estimator
+        return optimizer_estimator, optimizer_sequential
 
     def save(self, epoch):
         util.save_network(self.estimator, 'estimator', epoch, self.opt)
+        util.save_network(self.sequential_model, 'sequential', epoch, self.opt)
 
     def initialize_networks(self, opt):
         net_estimator = networks.define_estimator(opt)
         net_feature_selector = PCAfeatureselect(opt)
+        net_sequenctial = networks.define_sequence(opt)
         if not opt.isTrain or opt.continue_train:
             net_estimator = util.load_network(net_estimator, 'estimator', opt.which_epoch, opt)
             # net_feature_selector = util.load_network(net_feature_selector, 'FS', opt.which_epoch, opt)
+            net_sequenctial = util.load_network(net_sequenctial, 'sequential', opt.which_epoch, opt)
 
-        return net_estimator, net_feature_selector
+        return net_estimator, net_feature_selector, net_sequenctial
 
     def preprocess_input(self, data):
         data['static_input'] = data['static_input'].float().cuda()
@@ -79,7 +84,14 @@ class RNNModel(torch.nn.Module) :
         E_losses['Feature_BCE'] = self.criterionMSE(estimated[~nan_index], static_data[~nan_index])
 
         return E_losses, estimated
+    def compute_sequential_loss(self, sequence_input, init_state, label):
+        S_losses = {}
+        self.sequential_model.train()
+        nan_index = sequence_input.isnan().cuda()
+        gaussian_tensor = torch.normal(0, 1, size = sequence_input.size()).cuda()
 
+        sequence_input = torch.nan_to_num(sequence_input, 0) + torch.mul(nan_index, gaussian_tensor)
+        output = self.sequential_model(sequence_input, init_state)
     def select_features(self, estimated):
         selected = self.feature_selector(estimated)
         return selected

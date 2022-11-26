@@ -21,7 +21,7 @@ class RNNTrainer():
 
         self.generated = None
         if opt.isTrain:
-            self.optimizer_estimator  = self.rnn_model.create_optimizers(opt)
+            self.optimizer_estimator, self.optimizer_sqeuential  = self.rnn_model.create_optimizers(opt)
 
             self.old_lr = opt.lr
 
@@ -35,9 +35,13 @@ class RNNTrainer():
         self.estimated = estimated
 
     def run_feature_selector(self, data):
-        selected_features = self.rnn_model(data, mode='feature_select')
+        pca_dict = self.rnn_model(data, mode='feature_select')
 
-    # 변수명 수정 해야함.
+    def run_sequential(self, data):
+        self.optimizer_sqeuential.zero_grad()
+        self.rnn_model(data, mode='sequential')
+
+        # 변수명 수정 해야함.
     # def run_classifier(self, data):
     #     self.optimizer_G.zero_grad()
     #     g_losses, generated = self.rnn_model(data, mode='generator')
