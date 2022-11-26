@@ -25,6 +25,12 @@ def modify_commandline_options(parser, is_train):
     net_estimator = find_network_using_name(opt.estimator, 'estimator')
     parser = net_estimator.modify_commandline_options(parser, is_train)
 
+    # net_fs = find_network_using_name(opt.featureSelector, 'featureselect')
+    # parser = net_fs.modify_commandline_options(parser, is_train)
+
+    net_sequential = find_network_using_name(opt.sequence_model, 'sequential')
+    parser = net_sequential.modify_commandline_options(parser, is_train)
+
     return parser
 
 
@@ -40,7 +46,15 @@ def create_network(cls, opt):
 def define_estimator(opt) :
     net_estimator = find_network_using_name(opt.estimator, 'estimator')
     return create_network(net_estimator, opt)
-#
+# Define Feature Selector
+def define_FS(opt) :
+    net_fs = find_network_using_name(opt.featureSelector, 'featureselect')
+    return create_network(net_fs, opt)
+
+def define_sequence(opt):
+    netSequence_cls = find_network_using_name(opt.sequence_model, 'sequential')
+    return create_network(netSequence_cls, opt)
+
 # def define_G(opt):
 #     netG_cls = find_network_using_name(opt.netG, 'generator')
 #     return create_network(netG_cls, opt)

@@ -1,0 +1,34 @@
+       Autoencoder_layers: 512, 256, 128, 50             
+                batchSize: 16                            	[default: 1]
+                    beta1: 0.0                           
+                    beta2: 0.9                           
+          checkpoints_dir: ./checkpoints                 
+           continue_train: False                         
+                 dataroot: ./datasets                    
+             dataset_mode: gastric                       
+                    debug: False                         
+             display_freq: 100                           
+          display_winsize: 400                           
+                estimator: autoencoder                   
+              featur_size: 109                           
+                  gpu_ids: 0                             
+                init_type: xavier                        
+            init_variance: 0.02                          
+                  isTrain: True                          	[default: None]
+       load_from_opt_file: False                         
+                       lr: 0.0002                        
+         max_dataset_size: 9223372036854775807           
+                    model: rnn                           
+                 nThreads: 0                             
+                     name: rnn_gastric                   
+                    niter: 1000                          	[default: 500]
+              niter_decay: 0                             
+                  no_html: False                         
+                optimizer: adam                          
+                    phase: train                         
+               print_freq: 100                           
+          save_epoch_freq: 10                            
+         save_latest_freq: 5000                          
+           serial_batches: False                         
+          tensorboard_log: True                          	[default: False]
+              which_epoch: latest                        

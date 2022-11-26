@@ -34,7 +34,8 @@ class RNNTrainer():
         self.E_losses = E_losses
         self.estimated = estimated
 
-
+    def run_feature_selector(self, data):
+        selected_features = self.rnn_model(data, mode='feature_select')
 
     # 변수명 수정 해야함.
     # def run_classifier(self, data):

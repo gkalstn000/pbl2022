@@ -25,6 +25,9 @@ class BaseOptions():
         parser.add_argument('--checkpoints_dir', type=str, default='./checkpoints', help='models are saved here')
         parser.add_argument('--model', type=str, default='rnn', help='which model to use')
         parser.add_argument('--estimator', type=str, default='autoencoder', help='which model to use [autoencoder|diffusion]')
+        parser.add_argument('--sequence_model', type=str, default='rnn', help='which model to use [rnn]')
+        parser.add_argument('--featureSelector', type=str, default='PCA', help='which model to use [PCA]')
+        parser.add_argument('--n_component', type=int, default=50, help='# of component of PCA')
         parser.add_argument('--phase', type=str, default='train', help='train, val, test, etc')
 
         # input/output sizes

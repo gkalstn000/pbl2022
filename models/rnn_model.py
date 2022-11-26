@@ -7,6 +7,7 @@ import torch
 import models.networks as networks
 import util.util as util
 import torch.nn.functional as F
+from models.networks.featureselect import PCAfeatureselect
 
 class RNNModel(torch.nn.Module) :
     @staticmethod
@@ -18,8 +19,7 @@ class RNNModel(torch.nn.Module) :
         super(RNNModel, self).__init__()
         self.opt = opt
 
-        self.estimtator = self.initialize_networks(opt) # 오타수정
-        self.feature_seoector = None
+        self.estimator, self.feature_selector = self.initialize_networks(opt) # 오타수정
         self.sequential_model = None
 
         if opt.isTrain:
@@ -30,10 +30,15 @@ class RNNModel(torch.nn.Module) :
 
         if mode == 'estimate' :
             E_losses, estimated = self.compute_estimator_loss(static)
+            self.estimated = estimated
             return E_losses, estimated
-
+        elif mode == 'feature_select' :
+            self.pca_dict = self.feature_selector(self.estimated)
+            self.selected_features = self.pca_dict['components']
+        elif mode == 'sequence' :
+            return None
     def create_optimizers(self, opt):
-        Estimator_params = list(self.estimtator.parameters())
+        Estimator_params = list(self.estimator.parameters())
 
         beta1, beta2 = opt.beta1, opt.beta2
         estimator_lr = opt.lr
@@ -47,11 +52,12 @@ class RNNModel(torch.nn.Module) :
 
     def initialize_networks(self, opt):
         net_estimator = networks.define_estimator(opt)
-
+        net_feature_selector = PCAfeatureselect(opt)
         if not opt.isTrain or opt.continue_train:
             net_estimator = util.load_network(net_estimator, 'estimator', opt.which_epoch, opt)
+            # net_feature_selector = util.load_network(net_feature_selector, 'FS', opt.which_epoch, opt)
 
-        return net_estimator
+        return net_estimator, net_feature_selector
 
     def preprocess_input(self, data):
         data['static_input'] = data['static_input'].float().cuda()
@@ -62,7 +68,7 @@ class RNNModel(torch.nn.Module) :
 
     def compute_estimator_loss(self, static_data):
         E_losses = {}
-        self.estimtator.train()
+        self.estimator.train()
 
         nan_index = static_data.isnan().cuda()
         gaussian_tensor = torch.normal(0, 1, size = static_data.size()).cuda()
@@ -73,8 +79,12 @@ class RNNModel(torch.nn.Module) :
         E_losses['Feature_BCE'] = self.criterionMSE(estimated[~nan_index], static_data[~nan_index])
 
         return E_losses, estimated
+
+    def select_features(self, estimated):
+        selected = self.feature_selector(estimated)
+        return selected
     def estimate_feature(self, static_data):
-        estimated = self.estimtator(static_data)
+        estimated = self.estimator(static_data)
         return estimated
     def use_gpu(self):
         return len(self.opt.gpu_ids) > 0
