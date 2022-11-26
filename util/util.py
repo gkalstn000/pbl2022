@@ -11,7 +11,8 @@ import numpy as np
 from PIL import Image
 import os
 import argparse
-import dill as pickle
+# import dill as pickle
+import pickle
 import util.coco
 
 

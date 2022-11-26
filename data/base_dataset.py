@@ -48,13 +48,55 @@ class BaseDataset(data.Dataset):
         assert len(dataframe.columns) == len(df_patient.columns) + len(df_surgery.columns) + len(df_sequential.columns) + len(df_label.columns) + len(df_other.columns)
 
         # patient columns 에서 필요없는 column drop
-        drop_columns = ['Patient_number', 'hospitalization_data', 'surgery_date', 'discharge_date']
+
+        # == 환자기본정보 ==
+        # 'Patient_number', 'Prediction_day', 'sex', 'age', 'hospitalization_data', 'surgery_date', 'discharge_date', 'height', 'weight', 'BMI', 'smoking', 'cancer_heredity'
+        
+        # == 환자수술이력 ==
+        # 'ASA_score', 'HTN', 'DM', 'Dyslipidemia', 'cardiovascular_disease', 'cerebrovascular_disease', 'kidney_disease', 'respiratory_disease', 'primary_cancer', 
+        # 'other_disease', 'abdominal_surgery_history', 'abdominal_surgery_history stomach', 'other_surgery_history'
+        
+        # 애매한 것(나중에 제거해 볼만 한 것) : 'sex', 'age', 'BMI'
+        # 필수 : 'smoking', 'DM', 'abdominal_surgery_history stomach', 'cardiovascular_disease
+        drop_columns = [
+            # == 환자기본정보 ==
+            'Patient_number', 'Prediction_day', 'hospitalization_data', 'surgery_date', 'discharge_date', 'height', 'weight', 'cancer_heredity',
+            # == 환자수술이력 ==
+            'ASA_score', 'HTN', 'Dyslipidemia', 'cerebrovascular_disease', 'kidney_disease', 'respiratory_disease', 'primary_cancer',
+            'other_disease', 'abdominal_surgery_history', 'other_surgery_history'
+        ]
         df_patient = df_patient.drop(drop_columns, axis = 1)
 
         # surgery columns 에서 필요없는 column drop
-        drop_columns = ['post_ESD', 'before_AGC', 'before_EGC', 'before_tubular', 'before_circular', 'before_clipping', 'before_EUS', 'before_PET_CT',
-                        'cancer_count', 'after_AGC1', 'after_EGC1', 'after_tubular1', 'after_circular1', 'after_AGC2', 'after_EGC2', 'after_tubular2', 'after_circular2', 'after_AGC3', 'after_EGC3', 'after_tubular3', 'after_circular3',
-                        'WHO_classification', 'WHO_cell_dist', 'L_classification', 'M_classification', 'lymphatics_invasion', 'surgery_time']
+
+        # == 수술 전 데이터 ==
+        # 'before_echocardiography', 'before_pulmonary', 'before_cTNM', 'before_chest_CT', 'post_ESD', 'before_AGC', 'before_EGC', 'before_tubular', 'before_circular', 'before_clipping', 'before_EUS', 'before_PET_CT'
+
+        # == 수술 데이터 ==
+        # 'emergency', 'surgery_name', 'open_surgery', 'anastomosis', 'surgery_time', 'bleeding', 'consolidation_resection', 'adhesion', 'invasion', 'radicality', 'LN_dissection', 'vascular_mutation', 'transfusion'
+
+        # == 수술 후 데이터 ==
+        # 'cancer_count', 'after_AGC1', 'after_EGC1', 'after_tubular1', 'after_circular1', 'size1', 'after_AGC2', 'after_EGC2', 'after_tubular2', 'after_circular2', 'size2', 'after_AGC3', 'after_EGC3', 'after_tubular3', 'after_circular3', 'size3'
+
+        # == 수술 후 분석 데이터 ==
+        # 'margin_p', 'margin_d', 'depth', 'TNM', 'Stage', 'g_lymph', 'm_lymph', 'WHO_classification', 'WHO_cell_dist', 'L_classification', 'M_classification',  'lymphatics_invasion', 'vascular_invasion', 'perinerual_invasion', 'additional_findings'
+
+        # 교수님 추천
+        # 수술 후 데이터 : 'after_AGC1', 'after_EGC1', 'after_tubular1', 'after_circular1', 'size1', 'after_AGC2', 'after_EGC2', 'after_tubular2', 'after_circular2', 'size2', 'after_AGC3', 'after_EGC3', 'after_tubular3', 'after_circular3', 'size3'
+        # 수술 후 분석 데이터 : 'margin_p', 'margin_d', 'depth', 'WHO_classification', 'WHO_cell_dist', 'L_classification', 'M_classification', 
+        # 논문 기반 : 'g_lymph', 'm_lymph'
+        # margin_p, margin_d : 너무 많은 missing values
+        drop_columns = [
+            'before_echocardiography', 'before_pulmonary', 'before_cTNM', 'before_chest_CT', 'post_ESD', 'before_AGC', 'before_EGC', 'before_tubular', 'before_circular', 'before_clipping', 'before_EUS', 'before_PET_CT',
+            'emergency', 'surgery_time', 'bleeding', 'adhesion', 'invasion', 'radicality', 'LN_dissection', 'vascular_mutation', 'transfusion',
+            'cancer_count', 'after_AGC1', 'after_EGC1', 'after_tubular1', 'after_circular1', 'size1', 'after_AGC2', 'after_EGC2', 'after_tubular2', 'after_circular2', 'size2', 'after_AGC3', 'after_EGC3', 'after_tubular3', 'after_circular3', 'size3',
+            'margin_p', 'margin_d', 'depth', 'TNM', 'Stage', 'WHO_classification', 'WHO_cell_dist', 'L_classification', 'M_classification', 'lymphatics_invasion', 'vascular_invasion', 'perinerual_invasion', 'additional_findings'
+        ]
+        # drop_columns = [
+        #     'post_ESD', 'before_AGC', 'before_EGC', 'before_tubular', 'before_circular', 'before_clipping', 'before_EUS', 'before_PET_CT',
+        #                 'cancer_count', 'after_AGC1', 'after_EGC1', 'after_tubular1', 'after_circular1', 'after_AGC2', 'after_EGC2', 'after_tubular2', 'after_circular2', 'after_AGC3', 'after_EGC3', 'after_tubular3', 'after_circular3',
+        #                 'WHO_classification', 'WHO_cell_dist', 'L_classification', 'M_classification', 'lymphatics_invasion', 'surgery_time'
+        # ]
         df_surgery = df_surgery.drop(drop_columns, axis = 1)
 
 
