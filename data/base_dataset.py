@@ -58,14 +58,14 @@ class BaseDataset(data.Dataset):
         
         # 애매한 것(나중에 제거해 볼만 한 것) : 'sex', 'age', 'BMI'
         # 필수 : 'smoking', 'DM', 'abdominal_surgery_history stomach', 'cardiovascular_disease
-        drop_columns = [
+        patient_drop_columns = [
             # == 환자기본정보 ==
-            'Patient_number', 'Prediction_day', 'hospitalization_data', 'surgery_date', 'discharge_date', 'height', 'weight', 'cancer_heredity',
+            'Patient_number', 'hospitalization_data', 'surgery_date', 'discharge_date', 'height', 'weight', 'cancer_heredity',
             # == 환자수술이력 ==
             'ASA_score', 'HTN', 'Dyslipidemia', 'cerebrovascular_disease', 'kidney_disease', 'respiratory_disease', 'primary_cancer',
             'other_disease', 'abdominal_surgery_history', 'other_surgery_history'
         ]
-        df_patient = df_patient.drop(drop_columns, axis = 1)
+        df_patient = df_patient.drop(patient_drop_columns, axis = 1)
 
         # surgery columns 에서 필요없는 column drop
 
@@ -86,27 +86,28 @@ class BaseDataset(data.Dataset):
         # 수술 후 분석 데이터 : 'margin_p', 'margin_d', 'depth', 'WHO_classification', 'WHO_cell_dist', 'L_classification', 'M_classification', 
         # 논문 기반 : 'g_lymph', 'm_lymph'
         # margin_p, margin_d : 너무 많은 missing values
-        drop_columns = [
-            'before_echocardiography', 'before_pulmonary', 'before_cTNM', 'before_chest_CT', 'post_ESD', 'before_AGC', 'before_EGC', 'before_tubular', 'before_circular', 'before_clipping', 'before_EUS', 'before_PET_CT',
+        surgery_drop_columns = [
+            'before_echocardiography', 'before_pulmonary', 'before_chest_CT', 'post_ESD', 'before_AGC', 'before_EGC', 'before_tubular', 'before_circular', 'before_clipping', 'before_EUS', 'before_PET_CT',
             'emergency', 'surgery_time', 'bleeding', 'adhesion', 'invasion', 'radicality', 'LN_dissection', 'vascular_mutation', 'transfusion',
             'cancer_count', 'after_AGC1', 'after_EGC1', 'after_tubular1', 'after_circular1', 'size1', 'after_AGC2', 'after_EGC2', 'after_tubular2', 'after_circular2', 'size2', 'after_AGC3', 'after_EGC3', 'after_tubular3', 'after_circular3', 'size3',
-            'margin_p', 'margin_d', 'depth', 'TNM', 'Stage', 'WHO_classification', 'WHO_cell_dist', 'L_classification', 'M_classification', 'lymphatics_invasion', 'vascular_invasion', 'perinerual_invasion', 'additional_findings'
+            #'margin_p', 'margin_d', 
+            'depth', 'Stage', 'WHO_classification', 'WHO_cell_dist', 'L_classification', 'M_classification', 'lymphatics_invasion', 'vascular_invasion', 'perinerual_invasion', 'additional_findings'
         ]
         # drop_columns = [
         #     'post_ESD', 'before_AGC', 'before_EGC', 'before_tubular', 'before_circular', 'before_clipping', 'before_EUS', 'before_PET_CT',
         #                 'cancer_count', 'after_AGC1', 'after_EGC1', 'after_tubular1', 'after_circular1', 'after_AGC2', 'after_EGC2', 'after_tubular2', 'after_circular2', 'after_AGC3', 'after_EGC3', 'after_tubular3', 'after_circular3',
         #                 'WHO_classification', 'WHO_cell_dist', 'L_classification', 'M_classification', 'lymphatics_invasion', 'surgery_time'
         # ]
-        df_surgery = df_surgery.drop(drop_columns, axis = 1)
+        df_surgery = df_surgery.drop(surgery_drop_columns, axis = 1)
 
 
         # category setting + make dummy variable
         # patient data 전처리(수치형으로 변경)
-        numercial_float = ['age', 'ASA_score', 'height', 'weight', 'BMI', ]
-        categorycal_int = ['sex', 'smoking', 'cancer_heredity', 'HTN', 'DM', 'Dyslipidemia', 'cardiovascular_disease',
+        numercial_float = list(set(['age', 'ASA_score', 'height', 'weight', 'BMI']) - set(patient_drop_columns))
+        categorycal_int = list(set(['sex', 'smoking', 'cancer_heredity', 'HTN', 'DM', 'Dyslipidemia', 'cardiovascular_disease',
                            'cerebrovascular_disease', 'kidney_disease', 'respiratory_disease',
                            'primary_cancer', 'other_disease', 'abdominal_surgery_history',
-                           'abdominal_surgery_history stomach', 'other_surgery_history']
+                           'abdominal_surgery_history stomach', 'other_surgery_history']) - set(patient_drop_columns))
 
         for column in categorycal_int:
             df_patient[column] = np.where((~df_patient[column].isnull()) & (df_patient[column] != '0'), '1', df_patient[column])
@@ -122,6 +123,7 @@ class BaseDataset(data.Dataset):
         margin_d = margin_d.fillna(0)
         df_surgery = pd.concat([df_surgery.drop(['margin_p', 'margin_d'], axis = 1), margin_p, margin_d], axis = 1)
         numercial_column = ['bleeding', 'size1', 'size2', 'size3', 'margin_p1', 'margin_p2','margin_p3', 'margin_d1', 'margin_d2', 'margin_d3', 'g_lymph', 'm_lymph']
+        numercial_column = list(set(numercial_column) - set(surgery_drop_columns))
         df_surgery[numercial_column]=df_surgery[numercial_column].astype(np.float)
 
         category_column = [col for col in df_surgery.columns if col not in numercial_column]

@@ -17,6 +17,13 @@ class GastricDataset(BaseDataset) :
         df_patient, df_surgery, df_sequential, df_label, df_other = self.preprocess(df)
 
         df_static = pd.concat([df_patient, df_surgery, df_other], axis = 1)
+        
+    # def initialize(self):
+    #     # self.opt = opt
+    #     df = pd.read_csv(os.path.join('./datasets', 'gastric', 'train.csv'))
+    #     df_patient, df_surgery, df_sequential, df_label, df_other = self.preprocess(df)
+
+    #     df_static = pd.concat([df_patient, df_surgery, df_other], axis = 1)
 
 
 
